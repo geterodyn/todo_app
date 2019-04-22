@@ -15,6 +15,7 @@
 		</li>
 		<li><i class="far fa-calendar-alt"></i>&nbsp;Создана: {{ object.created | date:"Y-b-d H:i" }}</li>
 		<li><i class="far fa-clock"></i>&nbsp;Последнее изменение: {{ object.updated | date:"Y-b-d H:i" }}</li>
+		<li><i class="fas fa-hashtag"></i>&nbsp;{% for tag in object.tags.all %}{{ tag.name }} {% endfor %}</li>
 		<li><i class="far fa-edit"></i>&nbsp;<a href="{% url 'tasks:edit' pk=object.pk %}">Редактировать</a></li>
 	</ul>
 	<i class="fas fa-clipboard-list"></i>&nbsp;<a href="{% url 'tasks:list' %}">Назад к списку</a>

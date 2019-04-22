@@ -9,6 +9,7 @@
 		href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" 
 		integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" 
 		crossorigin="anonymous">
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css" integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
 
 	<script src="http://code.jquery.com/jquery-3.3.1.min.js"></script>
 
@@ -31,15 +32,14 @@
 				{% block side_bar %}
 					{% if user.is_authenticated %}
 						<p>{{ user.first_name }}</p>
-						<img src="{{ user.profile.avatar.url }}" class="img-fluid">
 						<ul>
-							<li><a href="{% url 'edit' %}">Профиль</a></li>
-							<li><a href="{% url 'tasks:list' %}">Список задач</a></li>							
-							<li><a href="{% url 'tasks:create' %}">Добавить задачу</a></li>
-							<li><a href="{% url 'tasks:uncompleted' %}">Показать незавершенные задачи</a></li>
-							<li><a href="{% url 'tasks:sorted' %}">Задачи по приоритету</a></li>
-							<li><a href="{% url 'tasks:time' %}">Время суток</a></li>
-							<li><a href="{% url 'logout' %}">Выйти</a></li>
+							<li><i class="far fa-user"></i>&nbsp;<a href="{% url 'edit' %}">Профиль</a></li>
+							<li><i class="fas fa-clipboard-list"></i>&nbsp;<a href="{% url 'tasks:list' %}">Список задач</a></li>			
+							<li><i class="far fa-plus-square"></i>&nbsp;<a href="{% url 'tasks:create' %}">Добавить задачу</a></li>
+							<li><i class="fas fa-tasks"></i>&nbsp;<a href="{% url 'tasks:uncompleted' %}">Незавершенные задачи</a></li>
+							<li><i class="fas fa-sort-amount-down"></i>&nbsp;<a href="{% url 'tasks:sorted' %}">Задачи по приоритету</a></li>
+							<li><i class="fas fa-cloud-sun"></i>&nbsp;<a href="{% url 'tasks:time' %}">Время суток</a></li>
+							<li><i class="fas fa-sign-out-alt"></i>&nbsp;<a href="{% url 'logout' %}">Выйти</a></li>
 						</ul>
 					{% endif %}
 				{% endblock %}

@@ -1,5 +1,5 @@
 from django.http import HttpResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.views import View
 from django.views.generic import ListView
@@ -10,23 +10,24 @@ from django.contrib import messages
 from django.db.models import Q
 from django.core.mail import send_mail
 from django.conf import settings
+from taggit.models import Tag
+
+from datetime import datetime as dt, timedelta
 
 from tasks.models import TodoItem
 from tasks.forms import AddTaskForm, TodoItemForm, TodoItemExportForm
-
-from datetime import datetime as dt, timezone
 
 @login_required
 def index(request):
 	return HttpResponse('Примитивный ответ из приложения tasks')
 
-# def tasks_list(request):
-# 	all_tasks = TodoItem.objects.all()
-# 	return render(
-# 		request,
-# 		'tasks/list.html',
-# 		{'tasks': all_tasks}
-# 	)
+def filter_tags(tags_by_task):
+	res = []
+	for i in tags_by_task:
+		for j in i:
+			res.append(j)
+	return list(set(res))
+
 
 def complete_task(request, uid):
 	t = TodoItem.objects.get(id=uid)
@@ -34,18 +35,19 @@ def complete_task(request, uid):
 	t.save()
 	return HttpResponse('OK')
 
-def add_task(request):
-	if request.method == 'POST':
-		desc = request.POST['description']
-		t = TodoItem(description=desc)
-		t.save()
-	return reverse('tasks:list')
+# def add_task(request):
+# 	if request.method == 'POST':
+# 		desc = request.POST['description']
+# 		t = TodoItem(description=desc)
+# 		t.save()
 
-def delete_task(request, uid):
+# 	return reverse('tasks:list')
+
+def delete_task(request, uid, tag_slug=None):
 	t = TodoItem.objects.get(id=uid)
 	t.delete()
 	messages.success(request, 'Задача  удалена')
-	return redirect(reverse('tasks:list'))
+	return redirect(reverse('tasks:list_by_tag',args=tag_slug)) if tag_slug else redirect(reverse('tasks:list'))
 
 # def task_create(request):
 # 	if request.method == 'POST':
@@ -57,15 +59,22 @@ def delete_task(request, uid):
 # 		form = TodoItemForm()
 # 	return render(request, 'tasks/create.html', {'form': form})
 
+def SortedTaskListView(request):
+	u = request.user
+	template = 'tasks/sorted_tasks.html'
+	tasks = TodoItem.objects.filter(owner=u)
+	high = tasks.filter(priority=1)
+	med = tasks.filter(priority=2)
+	low = tasks.filter(priority=3)
+	return render(request, template, {'high': high, 'med': med, 'low': low})
+
 class TaskListView(LoginRequiredMixin,ListView):
 	model = TodoItem
 	context_object_name = 'tasks'
 	template_name = 'tasks/list.html'
-	
-		
+
 	def get_queryset(self):
 		# qs = super().get_queryset()
-		now = dt.now()
 		u = self.request.user
 		'''
 		поскольку мы импортировали и отнаследовали обработчик от класса LoginRequiredMixin, то проверять пользователя
@@ -75,7 +84,20 @@ class TaskListView(LoginRequiredMixin,ListView):
 			return []
 		'''
 		return u.tasks.all()
-	
+
+	def get_context_data(self, **kwargs):
+		context = super().get_context_data(**kwargs)
+		u = self.request.user
+
+		user_tasks = self.get_queryset()
+		tags = []
+		for t in user_tasks:
+			tags.append(list(t.tags.all()))
+		
+		context['tags'] = filter_tags(tags)
+		return context
+
+
 class UncompletedTaskListView(LoginRequiredMixin, ListView):
 	model = TodoItem
 	context_object_name = 'tasks'
@@ -84,42 +106,6 @@ class UncompletedTaskListView(LoginRequiredMixin, ListView):
 	def get_queryset(self):
 		u = self.request.user
 		return TodoItem.objects.filter(owner=u).filter(is_completed=False)
-
-def SortedTaskListView(request):
-	u = request.user
-	template = 'tasks/sorted_tasks.html'
-	tasks = TodoItem.objects.filter(owner=u)
-	high_in_func = tasks.filter(priority=1)
-	med = tasks.filter(priority=2)
-	low = tasks.filter(priority=3)
-	return render(request, template, {'high_in_template': high_in_func, 'med': med, 'low': low})
-
-class TimeOfDay(LoginRequiredMixin, ListView):
-	model = TodoItem
-	context_object_name = 'tasks'
-	template_name = 'tasks/time_of_day.html'
-
-	def get_context_data(self, **kwargs):
-		# string = 'day'
-		now = dt.now()
-		if now.hour in range(6):
-			time_of_day = 'night'
-			time_of_day_ru = 'ночь'
-		elif now.hour in range(6,12):
-			time_of_day = 'morning'
-			time_of_day_ru = 'утро'
-		elif now.hour in range(12,18):
-			time_of_day = 'day'
-			time_of_day_ru = 'день'
-		elif now.hour in range(18,24):
-			time_of_day = 'evening'
-			time_of_day_ru = 'вечер'
-
-		context = super().get_context_data(**kwargs)
-		context['time_of_day'] = time_of_day
-		context['time_of_day_ru'] = time_of_day_ru
-		return context
-
 
 class TaskCreateView(View):
 	def my_render(self, request, form):
@@ -131,7 +117,8 @@ class TaskCreateView(View):
 			new_task = form.save(commit=False)
 			new_task.owner = request.user
 			new_task.save()
-			messages.success(request, 'Задача создана')
+			form.save_m2m()
+			messages.success(request, 'Задача добавлена')
 			return redirect(reverse('tasks:list'))
 			
 		return self.my_render(request, form)
@@ -148,6 +135,7 @@ class TaskEditView(LoginRequiredMixin, View):
 			new_task = form.save(commit=False)
 			new_task.owner = request.user
 			new_task.save()
+			form.save_m2m()
 			messages.success(request, 'Задача изменена')
 			return redirect(reverse('tasks:list'))
 		return render(request, 'tasks/edit.html', {'form':form, 'task':t })
@@ -171,45 +159,41 @@ class TaskExportView(LoginRequiredMixin, View):
 			q = q | Q(priority=TodoItem.PRIORITY_LOW)
 		tasks = TodoItem.objects.filter(owner=user).filter(q).all()
 
-		high_pri, med_pri, low_pri = [],[],[]
-		
 		body = 'Ваши задачи и приоритеты:\n'
 		if priorities['prio_sorted']:
 			body += '(Разбито по приоритетам):\n'
-			for t in list(tasks):
-				if t.priority == 1:
-					high_pri.append(t)
-				elif t.priority == 2:
-					med_pri.append(t)
-				else:
-					low_pri.append(t)
+			
+			high_pri = [t for t in tasks if t.priority == 1]
+			med_pri = [t for t in tasks if t.priority == 2]
+			low_pri = [t for t in tasks if t.priority == 3]
+	
 			body += '\nВысокий приоритет\n'
 			for t in high_pri:
 				if t.is_completed:
-					body += f"[x] {t.description} \n"
+					body += f"[x] {t.description} (тэги задачи - {', '.join([tag.name for tag in t.tags.all()])})\n"
 				else:
-					body += f"[ ] {t.description} \n"
+					body += f"[ ] {t.description} (тэги задачи - {', '.join([tag.name for tag in t.tags.all()])})\n"
 			body += '__________________________________________________________'
 			body += '\nСредний приоритет\n'
 			for t in med_pri:
 				if t.is_completed:
-					body += f"[x] {t.description} \n"
+					body += f"[x] {t.description} (тэги задачи - {', '.join([tag.name for tag in t.tags.all()])})\n"
 				else:
-					body += f"[ ] {t.description} \n"
+					body += f"[ ] {t.description} (тэги задачи - {', '.join([tag.name for tag in t.tags.all()])})\n"
 			body += '__________________________________________________________'
 			body += '\nНизкий приоритет\n'
 			for t in low_pri:
 				if t.is_completed:
-					body += f"[x] {t.description} \n"
+					body += f"[x] {t.description} (тэги задачи - {', '.join([tag.name for tag in t.tags.all()])})\n"
 				else:
-					body += f"[ ] {t.description} \n"
+					body += f"[ ] {t.description} (тэги задачи - {', '.join([tag.name for tag in t.tags.all()])})\n"
 			
 		else:
 			for t in list(tasks):
 				if t.is_completed:
-					body += f"[x] {t.description} ({t.get_priority_display()})\n"
+					body += f"[x] {t.description} ({t.get_priority_display()}) (тэги задачи - {', '.join([tag.name for tag in t.tags.all()])})\n"
 				else:
-					body += f"[ ] {t.description} ({t.get_priority_display()})\n"
+					body += f"[ ] {t.description} ({t.get_priority_display()}) (тэги задачи - {', '.join([tag.name for tag in t.tags.all()])})\n"
 		return body
 
 	def post(self, request, *args, **kwargs):
@@ -228,3 +212,51 @@ class TaskExportView(LoginRequiredMixin, View):
 	def get(self, request, *args, **kwargs):
 		form = TodoItemExportForm()
 		return render(request, 'tasks/export.html', {'form': form})
+
+class TimeOfDay(LoginRequiredMixin, ListView):
+	model = TodoItem
+	context_object_name = 'tasks'
+	template_name = 'tasks/time_of_day.html'
+
+	def get_context_data(self, **kwargs):
+		# string = 'day'
+		now = dt.now() + timedelta(hours=7)
+		if now.hour in range(6):
+			time_of_day = 'night'
+			time_of_day_ru = 'ночь'
+		elif now.hour in range(6,12):
+			time_of_day = 'morning'
+			time_of_day_ru = 'утро'
+		elif now.hour in range(12,18):
+			time_of_day = 'day'
+			time_of_day_ru = 'день'
+		elif now.hour in range(18,24):
+			time_of_day = 'evening'
+			time_of_day_ru = 'вечер'
+
+		context = super().get_context_data(**kwargs)
+		context['time_of_day'] = time_of_day
+		context['time_of_day_ru'] = time_of_day_ru
+		return context
+
+def tasks_by_tag(request, tag_slug=None):
+    u = request.user
+    tasks = TodoItem.objects.filter(owner=u).all()
+    total_tasks_number = len(TodoItem.objects.filter(owner=u).all())
+    completed_task_number = len(TodoItem.objects.filter(owner=u).filter(is_completed=True).all())
+
+    tag = None
+    if tag_slug:
+        tag = get_object_or_404(Tag, slug=tag_slug)
+        tasks = tasks.filter(tags__in=[tag])
+
+    all_tags = [list(t.tags.all()) for t in tasks]
+    completed_task = [t for t in tasks if t.is_completed == True]
+    all_tags = filter_tags(all_tags)
+
+    return render(
+        request,
+        "tasks/list_by_tag.html",
+        {"tag": tag, "tasks": tasks, "all_tags": all_tags,
+         "total": total_tasks_number, "completed": completed_task_number},
+    )

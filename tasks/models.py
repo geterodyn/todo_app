@@ -1,6 +1,8 @@
 from django.db import models
 from django.urls import reverse
+from taggit.managers import TaggableManager
 from django.contrib.auth.models import User
+from todoapp.ru_taggit import RuTaggedItem
 
 
 class TodoItem(models.Model):
@@ -26,6 +28,7 @@ class TodoItem(models.Model):
 	priority = models.IntegerField(
 		"Приоритет", choices=PRIORITY_CHOICES, default=PRIORITY_MEDIUM
 		)
+	tags = TaggableManager(through=RuTaggedItem, help_text='Введите набор тэгов для задачи, разделяя их запятой', blank=True)
 
 	def __str__(self):
 		return self.description.lower()
