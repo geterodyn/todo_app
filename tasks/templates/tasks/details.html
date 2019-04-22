@@ -1,16 +1,21 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
+{% load static %}
+{% block extra_head %}
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css" integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
+{% endblock %}
+
 {% block title %}Задача {{ object.id }}{% endblock %}
 
 {% block main_content %}
-  <h1>Задача</h1>
-  <p><b>Описание</b>: {{ object }}</p>
-  <ul>
-    <li>
-      {{ object.is_completed|yesno:"Выполнена,Не выполнена" }}
-    </li>
-    <li><i class="far fa-calendar-alt"></i>&nbsp;Создана: {{ object.created|date:"Y-b-d H:i" }}</li>
-    <li><i class="far fa-clock"></i>&nbsp;Последнее изменение: {{ object.updated }}</li>
-    <li><i class="far fa-edit"></i>&nbsp;<a href="{% url "tasks:edit" pk=object.pk %}">Редактировать</a></li>
-  </ul>
-  <i class="fas fa-clipboard-list"></i>&nbsp;<a href="{% url "tasks:list" %}">Назад к списку</a>
+	<h1>Задача</h1>
+	<p><b>Описание</b>: {{ object }}</p>
+	<ul>
+		<li>
+			{{ object.is_completed | yesno:"Выполнена,Не выполнена" }}
+		</li>
+		<li><i class="far fa-calendar-alt"></i>&nbsp;Создана: {{ object.created | date:"Y-b-d H:i" }}</li>
+		<li><i class="far fa-clock"></i>&nbsp;Последнее изменение: {{ object.updated | date:"Y-b-d H:i" }}</li>
+		<li><i class="far fa-edit"></i>&nbsp;<a href="{% url 'tasks:edit' pk=object.pk %}">Редактировать</a></li>
+	</ul>
+	<i class="fas fa-clipboard-list"></i>&nbsp;<a href="{% url 'tasks:list' %}">Назад к списку</a>
 {% endblock %}

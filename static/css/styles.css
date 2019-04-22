@@ -60,3 +60,19 @@ input[type="checkbox"] { width: 30px; }
 }
 
 .completed { text-decoration: line-through; }
+
+.morning {
+  background: blue;
+}
+
+.day {
+  background: green;
+}
+
+.evening {
+  background: orange ;
+}
+
+.night {
+  background: gray;
+}

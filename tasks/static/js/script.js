@@ -4,7 +4,7 @@ $(document).ready(function () {
 		$(this).attr('disabled', true);
 
 		uid = $(this).attr('data-uid');
-		$.get("/tasks/complete/" + uid);
+		$.get("/complete/" + uid);
 	});
 
 	$(document).on('click', '.remove', function(){

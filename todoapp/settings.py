@@ -130,12 +130,11 @@ LOGIN_REDIRECT_URL = "tasks:list"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media/")
 
-# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
-EMAIL_HOST = os.environ.get("EMAIL_HOST", 'smtp.example.com')
-EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", 'wrong_user@example.com')
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", 'wrong_password')
-EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "25"))
-EMAIL_USE_TLS = bool(os.environ.get("EMAIL_USE_TLS", ""))
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'geterodyn@gmail.com'
+EMAIL_HOST_PASSWORD = 'Anapurna@123'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 django_heroku.settings(locals())

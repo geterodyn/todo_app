@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block title %}Упорядоченные задачи{% endblock title %}
+
+{% block extra_head %}
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css" integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
+{% endblock %}
+
+{% block main_content %}
+	<h1>Задачи по приоритету</h1>
+	<ul id="todo-list">
+		<p>Наивысший приоритет <span class="badge badge-pill badge-danger">high</span></p>
+	{% if high %}	
+		{% for h in high %}
+			<li><i class="fas fa-bolt"></i>&nbsp;<a href="{% url 'tasks:details' h.id %}">{{ h }}</a>
+			<a class="remove" href={% url "tasks:delete" h.id %}>X</a>
+			</li>
+		{% endfor %}
+	{% else %}
+		<li><i>Нет задач с высшим приоритетом</i></li>
+	{% endif %}	
+		<hr/>
+		
+		<p>Средний приоритет <span class="badge badge-pill badge-warning">medium</span></p>
+	{% if med %}
+		{% for m in med %}
+			<li><i class="fas fa-bolt"></i>&nbsp;<a href="{% url 'tasks:details' m.id %}">{{ m }}</a>
+			<a class="remove" href={% url "tasks:delete" m.id %}>X</a>
+			</li>
+		{% endfor %}
+	{% else %}
+		<li><i>Нет задач со средним приоритетом</i></li>
+	{% endif %}
+
+		<hr/>
+	
+		<p>Низкий приоритет <span class="badge badge-pill badge-success">low</span></p>
+	{% if low%}
+		{% for low in low %}
+			<li><i class="fas fa-bolt"></i>&nbsp;<a href="{% url 'tasks:details' low.id %}">{{ low }}</a>
+			<a class="remove" href={% url "tasks:delete" low.id %}>X</a>
+			</li>
+		{% endfor %}
+	{% else %}
+		<li><i>Нет задач с низким приоритетом</i></li>
+	{% endif %}
+		<hr/>
+	</ul>
+{% endblock %}

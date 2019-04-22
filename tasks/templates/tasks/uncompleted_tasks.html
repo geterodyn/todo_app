@@ -1,15 +1,14 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %} Задачи на день {% endblock title %}
+{% block title %}Невыполненные задачи{% endblock title %}
 
 {% block extra_head %}
 	<script src="{% static 'js/script.js' %}"></script>
 {% endblock %}
 
 {% block main_content %}
-	<h1>Текущие задачи</h1>
-	<p><i class="fa fa-download"></i>&nbsp;<a href="{% url 'tasks:export' %}">экспорт</a></p>
+	<h1>Невыполненные задачи</h1>
 	<ul id="todo-list">
 		{% for task in tasks %}
 			{% if task.is_completed %}
@@ -27,7 +26,6 @@
 				<span class="badge badge-pill badge-success">&nbsp;</span>
 				{% endif %}
 				<a href="{% url 'tasks:details' task.id %}">{{ task }}</a>
-				<i>Was created {{ task.created|timesince }} ago</i>
 				<a class="remove" href={% url "tasks:delete" task.id %}>X</a>
 				<hr/>
 			</li>
