@@ -13,9 +13,10 @@ from django.conf import settings
 from taggit.models import Tag
 
 from datetime import datetime as dt, timedelta
+from trello import TrelloClient
 
 from tasks.models import TodoItem
-from tasks.forms import AddTaskForm, TodoItemForm, TodoItemExportForm
+from tasks.forms import AddTaskForm, TodoItemForm, TodoItemExportForm, TrelloImportForm
 
 @login_required
 def index(request):
@@ -34,6 +35,25 @@ def complete_task(request, uid):
 	t.is_completed = True
 	t.save()
 	return HttpResponse('OK')
+
+def complete_trello(request, uid):
+	task_todoapp = TodoItem.objects.get(id=uid)
+	
+	user = request.user
+	key = user.profile.trello_key
+	secret = user.profile.trello_secret
+	client = TrelloClient(api_key=key, api_secret=secret)
+	board = client.list_boards()[0]		# захардкодил самую первую доску в Trello
+	left_most = board.list_lists()[0]
+	right_most = board.list_lists()[-1]
+	for task in left_most.list_cards():
+		if task.name == task_todoapp.description:
+			task.change_list(right_most.id)
+	
+	task_todoapp.is_completed = True
+	task_todoapp.save()
+	return HttpResponse("OK")
+
 
 # def add_task(request):
 # 	if request.method == 'POST':
@@ -119,6 +139,15 @@ class TaskCreateView(View):
 			new_task.save()
 			form.save_m2m()
 			messages.success(request, 'Задача добавлена')
+			if form.cleaned_data['trello_sync']:
+				user = request.user
+				key = user.profile.trello_key
+				secret = user.profile.trello_secret
+				client = TrelloClient(api_key=key, api_secret=secret)
+				board = client.get_board(user.profile.trello_board)
+				to_do = board.list_lists()[0]
+				to_do.add_card(new_task.description)
+
 			return redirect(reverse('tasks:list'))
 			
 		return self.my_render(request, form)
@@ -143,6 +172,34 @@ class TaskEditView(LoginRequiredMixin, View):
 		t = TodoItem.objects.get(id=pk)
 		form = TodoItemForm(instance=t)
 		return render(request, 'tasks/edit.html', {'form': form, 'task': t})
+
+class TrelloTaskImport(LoginRequiredMixin, View):
+	def post(self,request,*args,**kwargs):
+		form = TrelloImportForm(request.POST)
+		user = request.user
+		key = user.profile.trello_key
+		secret = user.profile.trello_secret
+		if form.is_valid():
+			board_id = form.cleaned_data['board_id']
+			client = TrelloClient(api_key=key, api_secret=secret)
+			board = client.get_board(board_id)
+			left_most = board.list_lists()[0]
+			# right_most = board.list_lists()[-1]
+			todo_tasks = left_most.list_cards()
+			for task in todo_tasks:
+				t = TodoItem(description=task.name)
+				t.owner = user
+				t.trello_id = task.id
+				t.save()
+			messages.success(request, 'Задачи успешно импортированы')
+			return redirect(reverse('tasks:list'))
+	def get(self,request,*args,**kwargs):
+		form = TrelloImportForm()
+		return render(request, 'tasks/import.html', {'form':form})
+
+
+
+
 
 class TaskDetailsView(DetailView):
 	model = TodoItem
@@ -260,3 +317,4 @@ def tasks_by_tag(request, tag_slug=None):
         {"tag": tag, "tasks": tasks, "all_tags": all_tags,
          "total": total_tasks_number, "completed": completed_task_number},
     )
+

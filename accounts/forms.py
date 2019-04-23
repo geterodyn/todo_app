@@ -26,6 +26,9 @@ class UserEditForm(forms.ModelForm):
 		fields = ('first_name', 'last_name', 'email')
 
 class ProfileEditForm(forms.ModelForm):
+	trello_key = forms.CharField(label='optional Trello key', required=False)
+	trello_secret = forms.CharField(label='optional Trello secret', required=False)
+	trello_board = forms.CharField(label='optional Trello board ID', required=False)
 	class Meta:
 		model = Profile
-		fields = ('birthdate',)
+		fields = ('birthdate', 'trello_key', 'trello_secret', 'trello_board')

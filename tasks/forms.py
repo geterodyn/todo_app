@@ -8,8 +8,8 @@ class AddTaskForm(forms.Form):
 class TodoItemForm(forms.ModelForm):
 	class Meta:
 		model = TodoItem
-		fields = ('description','priority','tags')
-		labels = {'description': 'Описание', 'priority': '', 'tags':'тэги'}
+		fields = ('description','priority','tags', 'trello_sync')
+		labels = {'description': 'Описание', 'priority': 'Приоритет', 'tags':'тэги', 'trello_sync':'Синхронизировать с Trello'}
 
 class TodoItemExportForm(forms.Form):
 	prio_high = forms.BooleanField(
@@ -24,3 +24,9 @@ class TodoItemExportForm(forms.Form):
 	prio_sorted = forms.BooleanField(
 		label='Разбить по приоритетам', initial=False, required=False
 		)
+
+class TrelloImportForm(forms.Form):
+	board_id = forms.CharField(max_length=24, label='')
+
+# class TrelloSyncForm(forms.Form):
+# 	trello_sync = forms.BooleanField(label='Синхронизировать с Trello', initial=False, required=False)

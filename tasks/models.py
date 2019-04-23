@@ -27,8 +27,10 @@ class TodoItem(models.Model):
 	priority = models.IntegerField(
 		"Приоритет", choices=PRIORITY_CHOICES, default=PRIORITY_MEDIUM
 		)
-	tags = TaggableManager()
-
+	tags = TaggableManager(help_text='Введите набор тэгов для задачи, разделяя их запятой', blank=True)
+	trello_sync = models.BooleanField('Синхронизировать', default=False)
+	trello_id = models.CharField(max_length=64, null=True)
+	
 	def __str__(self):
 		return self.description.lower()
 
