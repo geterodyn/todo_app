@@ -135,7 +135,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media/")
 
 INTERNAL_IPS = ['127.0.0.1', 'localhost']
 
-EMAIL_HOST = 'smtp.yandex.ru'
+EMAIL_HOST = 'smtp.mail.yahoo.com'
 EMAIL_HOST_USER = str(os.environ.get('EMAIL_HOST_USER'))
 EMAIL_HOST_PASSWORD = str(os.environ.get('EMAIL_HOST_PASSWORD'))
 EMAIL_PORT = 465
