@@ -135,11 +135,11 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media/")
 
 INTERNAL_IPS = ['127.0.0.1', 'localhost']
 
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'geterodyn@gmail.com'
-EMAIL_HOST_PASSWORD = 'Anapurna@123'
-EMAIL_PORT = 587
+EMAIL_HOST = str(os.environ.get('EMAIL_HOST'))
+EMAIL_HOST_USER = str(os.environ.get('EMAIL_HOST_USER'))
+EMAIL_HOST_PASSWORD = str(os.environ.get('EMAIL_HOST_PASSWORD'))
+EMAIL_PORT = str(os.environ.get('EMAIL_PORT'))
 EMAIL_USE_TLS = True
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 django_heroku.settings(locals())
