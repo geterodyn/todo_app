@@ -20,7 +20,8 @@ from tasks.forms import AddTaskForm, TodoItemForm, TodoItemExportForm, TrelloImp
 
 @login_required
 def index(request):
-	return HttpResponse('Примитивный ответ из приложения tasks')
+	z = 5/0
+	return HttpResponse(z)
 
 def filter_tags(tags_by_task):
 	res = []
