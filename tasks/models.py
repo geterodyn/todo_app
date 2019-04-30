@@ -39,3 +39,18 @@ class TodoItem(models.Model):
 
 	def get_absolute_url(self):
 		return reverse('tasks:details', args=[self.pk])
+
+class TagCount(models.Model):
+	tag_slug = models.CharField(max_length=128)
+	tag_name = models.CharField(max_length=128)
+	tag_id = models.PositiveIntegerField(default=0)
+	tag_count = models.PositiveIntegerField(db_index=True, default=0)
+
+class PriorityCount(models.Model):
+	PRIORITY_CHOICES = [
+		(1, 'Высокий приоритет'),
+		(2, 'Средний приоритет'),
+		(3, 'Низкий приоритет'),
+		]
+	prio_level = models.PositiveIntegerField(choices=PRIORITY_CHOICES,default=1)
+	prio_count = models.PositiveIntegerField(db_index=True, default=0)

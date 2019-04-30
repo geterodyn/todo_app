@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Информация по тэгам{% endblock %}
+
+{% block main_content %}
+
+  <h1>Тэги и их количество</h1>
+
+  <ul>
+  {% for item in tagcount %}
+    <li>
+      <span class="badge badge-info">{{ item.tag_name }} : {{ item.tag_count }}</span>
+    </li>
+  {% endfor %}
+  </ul>
+ <h1>Количество задач по приоритетам</h1>
+  <ul>
+  {% for item in priocount %}
+    <li>
+      <span class="badge badge-info">Приоритет {{ item.prio_level }} : {{ item.prio_count }}</span>
+    </li>
+  {% endfor %}
+  </ul>
+{% endblock %}

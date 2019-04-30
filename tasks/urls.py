@@ -20,5 +20,6 @@ urlpatterns = [
 	path('sorted/', views.SortedTaskListView, name='sorted'),
 	path('time/', views.TimeOfDay.as_view(), name='time'),
 	path('import/',views.TrelloTaskImport.as_view(), name='import'),
+	path('tagscount/', views.tags_and_prios_count, name='tagscount'),
 	
 	]

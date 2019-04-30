@@ -17,7 +17,8 @@ from sentry_sdk.integrations.django import DjangoIntegration
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-SENTRY_DSN = str(os.environ.get('SENTRY_DSN'))
+# SENTRY_DSN = str(os.environ.get('SENTRY_DSN'))
+SENTRY_DSN = "https://4469e43c90794949b986defde596598f@sentry.io/1441323"
 
 sentry_sdk.init(dsn=SENTRY_DSN, integrations=[DjangoIntegration()])
 
@@ -145,5 +146,13 @@ EMAIL_HOST_PASSWORD = str(os.environ.get('EMAIL_HOST_PASSWORD'))
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+        'LOCATION': '127.0.0.1:11211',
+    }
+}
+
 
 django_heroku.settings(locals())

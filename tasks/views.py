@@ -7,7 +7,7 @@ from django.views.generic.detail import DetailView
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.core.mail import send_mail
 from django.conf import settings
 from taggit.models import Tag
@@ -15,13 +15,30 @@ from taggit.models import Tag
 from datetime import datetime as dt, timedelta
 from trello import TrelloClient
 
-from tasks.models import TodoItem
+from tasks.models import TodoItem, TagCount, PriorityCount
 from tasks.forms import AddTaskForm, TodoItemForm, TodoItemExportForm, TrelloImportForm
 
 @login_required
 def index(request):
-	z = 5/0
-	return HttpResponse(z)
+	return 5/0
+
+@login_required
+def tags_and_prios_count(request):
+	'''
+	Первый способ подсчитать количество тэгов.
+	counts = {t.name: t.taggit_taggeditem_items.count() for t in Tag.objects.all()}
+	'''
+	######
+	'''
+	Второй способ подсчитать количество тэгов
+	counts = Tag.objects.annotate(total_tasks=Count('todoitem')).order_by('-total_tasks')
+	counts = {c.name : c.total_tasks for c in counts}
+	return render(request, 'tasks/tag_count.html', {'counts': counts})
+	'''
+	tags = TagCount.objects.all().order_by('-tag_count')
+	prios = PriorityCount.objects.all().order_by('prio_level')
+	template = 'tasks/tag_count.html'
+	return render(request, template, {'tagcount': tags, 'priocount':prios})
 
 def filter_tags(tags_by_task):
 	res = []
