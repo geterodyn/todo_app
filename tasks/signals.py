@@ -19,13 +19,13 @@ def task_tags_updated(sender, instance, action, model, **kwargs):
         obj.tag_count = count
         obj.save()
 
-# @receiver(post_delete, sender=TodoItem)
-# def task_tags_delete_updated(sender, instance, **kwargs):
-#     for tagname in instance.tags.names():
-#         tagmodel = Tag.objects.filter(name=tagname).first()
-#         obj = TagCount.objects.get(tag_id=tagmodel.id)
-#         obj.tag_count -= 1
-#         obj.save()
+@receiver(post_delete, sender=TodoItem)
+def task_tags_delete_updated(sender, instance, **kwargs):
+    for tagname in instance.tags.names():
+        tagmodel = Tag.objects.filter(name=tagname).first()
+        obj = TagCount.objects.get(tag_id=tagmodel.id)
+        obj.tag_count -= 1
+        obj.save()
 
 @receiver(post_save, sender=TodoItem)
 def task_priority_updated(sender, **kwargs):
