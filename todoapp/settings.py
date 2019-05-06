@@ -10,15 +10,14 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 import os
-import django_heroku
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
+from . import local
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# SENTRY_DSN = str(os.environ.get('SENTRY_DSN'))
-SENTRY_DSN = "https://4469e43c90794949b986defde596598f@sentry.io/1441323"
+SENTRY_DSN = local.SENTRY_DSN
 
 sentry_sdk.init(dsn=SENTRY_DSN, integrations=[DjangoIntegration()])
 
@@ -26,7 +25,7 @@ sentry_sdk.init(dsn=SENTRY_DSN, integrations=[DjangoIntegration()])
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '8=wn5u_6pps6w%4)6jygl=w*5p6s&522ilnu$^2(a_h+l@_xmt'
+SECRET_KEY = local.SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -84,12 +83,7 @@ WSGI_APPLICATION = 'todoapp.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
-}
+DATABASES = local.DATABASES
 
 
 # Password validation
@@ -140,11 +134,12 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media/")
 
 INTERNAL_IPS = ['127.0.0.1', 'localhost']
 
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = str(os.environ.get('EMAIL_HOST_USER'))
-EMAIL_HOST_PASSWORD = str(os.environ.get('EMAIL_HOST_PASSWORD'))
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.mail.ru'
+EMAIL_HOST_USER = local.EMAIL_HOST_USER
+EMAIL_HOST_PASSWORD = local.EMAIL_HOST_PASSWORD
+EMAIL_PORT = 465
+EMAIL_USE_SSL = True
+
 # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 CACHES = {
@@ -155,4 +150,3 @@ CACHES = {
 }
 
 
-django_heroku.settings(locals())
